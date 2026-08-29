@@ -1,7 +1,6 @@
 // src/main/java/com/in6206/controller/ViewController.java
 package com.in6206.controller;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -24,8 +23,7 @@ public class ViewController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Authentication auth) {
-        System.out.println("Current user: " + auth.getName());
+    public String dashboard() {
         return "dashboard";
     }
 

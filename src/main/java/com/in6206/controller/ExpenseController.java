@@ -3,20 +3,24 @@ package com.in6206.controller;
 import com.in6206.model.Expense;
 import com.in6206.model.User;
 import com.in6206.payload.ExpenseDto;
-import com.in6206.repository.UserRepository;
-import com.in6206.security.UserDetailsImpl;
+import com.in6206.service.CurrentUserService;
 import com.in6206.service.ExpenseService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -24,92 +28,86 @@ import java.util.stream.Collectors;
 public class ExpenseController {
 
     private final ExpenseService expenseService;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
-    public ExpenseController(ExpenseService expenseService, UserRepository userRepository) {
+    public ExpenseController(ExpenseService expenseService, CurrentUserService currentUserService) {
         this.expenseService = expenseService;
-        this.userRepository = userRepository;
-    }
-
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-            return userRepository.findById(userDetails.getId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-        }
-        throw new RuntimeException("User not authenticated");
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping
     public ResponseEntity<List<ExpenseDto>> getAllExpenses() {
-        User currentUser = getCurrentUser();
-       // User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = currentUserService.requireCurrentUser();
         List<Expense> expenses = expenseService.getAllExpensesByUser(currentUser.getId());
-        List<ExpenseDto> dtos = expenses.stream()
-                .map(e -> new ExpenseDto(e.getId(), e.getAmount(), e.getCategory(), e.getExpenseDate(), e.getDescription()))
-                .collect(Collectors.toList());
+        List<ExpenseDto> dtos = expenses.stream().map(ExpenseDto::from).toList();
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/search")
+    public Page<ExpenseDto> searchExpenses(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount,
+            @PageableDefault(size = 10, sort = "expenseDate", direction = org.springframework.data.domain.Sort.Direction.DESC)
+            Pageable pageable) {
+        User currentUser = currentUserService.requireCurrentUser();
+        return expenseService.searchExpenses(
+                        currentUser.getId(), category, from, to, minAmount, maxAmount, pageable)
+                .map(ExpenseDto::from);
+    }
+
     @PostMapping
-    public ResponseEntity<ExpenseDto> createExpense(@RequestBody ExpenseDto expenseDto) {
-        User currentUser = getCurrentUser();
-        //User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Expense expense = new Expense();
-        expense.setAmount(expenseDto.getAmount());
-        expense.setCategory(expenseDto.getCategory());
-        expense.setExpenseDate(expenseDto.getExpenseDate());
-        expense.setDescription(expenseDto.getDescription());
-        Expense saved = expenseService.createExpense(expense, currentUser);
-        ExpenseDto dto = new ExpenseDto(saved.getId(), saved.getAmount(), saved.getCategory(), saved.getExpenseDate(), saved.getDescription());
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<ExpenseDto> createExpense(@Valid @RequestBody ExpenseDto expenseDto) {
+        User currentUser = currentUserService.requireCurrentUser();
+        Expense saved = expenseService.createExpense(expenseDto, currentUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ExpenseDto.from(saved));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        User currentUser = getCurrentUser();
-        Expense existing = expenseService.getExpenseById(id);
-        if (!existing.getUser().getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        expenseService.deleteExpense(id);
+        User currentUser = currentUserService.requireCurrentUser();
+        expenseService.deleteExpense(id, currentUser);
         return ResponseEntity.noContent().build();
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<ExpenseDto> updateExpense(@PathVariable Long id, @RequestBody ExpenseDto expenseDto) {
-        User currentUser = getCurrentUser();
-       // User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Expense existing = expenseService.getExpenseById(id);
-        if (!existing.getUser().getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        existing.setAmount(expenseDto.getAmount());
-        existing.setCategory(expenseDto.getCategory());
-        existing.setExpenseDate(expenseDto.getExpenseDate());
-        existing.setDescription(expenseDto.getDescription());
-        Expense updated = expenseService.saveExpense(existing);
-        ExpenseDto dto = new ExpenseDto(updated.getId(), updated.getAmount(), updated.getCategory(),
-                updated.getExpenseDate(), updated.getDescription());
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<ExpenseDto> updateExpense(@PathVariable Long id,
+                                                     @Valid @RequestBody ExpenseDto expenseDto) {
+        User currentUser = currentUserService.requireCurrentUser();
+        Expense updated = expenseService.updateExpense(id, expenseDto, currentUser);
+        return ResponseEntity.ok(ExpenseDto.from(updated));
     }
 
     @GetMapping("/report")
     public void downloadReport(HttpServletResponse response) throws IOException {
-        User currentUser = getCurrentUser();
-       // User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = currentUserService.requireCurrentUser();
         List<Expense> expenses = expenseService.getAllExpensesByUser(currentUser.getId());
 
         response.setContentType("text/csv");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setHeader("Content-Disposition", "attachment; filename=expenses.csv");
 
         PrintWriter writer = response.getWriter();
+        writer.write('\ufeff');
         writer.println("ID,Amount,Category,Date,Description");
         for (Expense e : expenses) {
-            writer.printf("%d,%.2f,%s,%s,%s%n",
-                    e.getId(), e.getAmount(), e.getCategory(),
-                    e.getExpenseDate(), e.getDescription() == null ? "" : e.getDescription());
+            writer.printf("%d,%s,%s,%s,%s%n",
+                    e.getId(),
+                    e.getAmount().toPlainString(),
+                    csvCell(e.getCategory()),
+                    e.getExpenseDate(),
+                    csvCell(e.getDescription()));
         }
         writer.flush();
+    }
+
+    private String csvCell(String value) {
+        String safe = value == null ? "" : value;
+        if (!safe.isEmpty() && "=+-@".indexOf(safe.charAt(0)) >= 0) {
+            safe = "'" + safe;
+        }
+        return '"' + safe.replace("\"", "\"\"") + '"';
     }
 }

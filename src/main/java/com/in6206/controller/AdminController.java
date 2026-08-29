@@ -1,20 +1,21 @@
 package com.in6206.controller;
 
-import com.in6206.model.Expense;
 import com.in6206.payload.AdminUserDto;
 import com.in6206.payload.ExpenseDto;
 import com.in6206.repository.ExpenseRepository;
 import com.in6206.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AdminController {
 
     private final UserRepository userRepository;
@@ -34,11 +35,6 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/admin")
-    public String adminPage() {
-        return "admin"; // templates/admin.html
-    }
-
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
@@ -52,11 +48,9 @@ public class AdminController {
     @GetMapping("/expenses/report")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ExpenseDto>> getGlobalReport() {
-        List<Expense> all = expenseRepository.findAll();
-        List<ExpenseDto> dtos = all.stream()
-                .map(e -> new ExpenseDto(e.getId(), e.getAmount(), e.getCategory(),
-                        e.getExpenseDate(), e.getDescription()))
-                .collect(Collectors.toList());
+        List<ExpenseDto> dtos = expenseRepository.findAll().stream()
+                .map(ExpenseDto::from)
+                .toList();
         return ResponseEntity.ok(dtos);
     }
 }

@@ -1,7 +1,6 @@
 package com.in6206.config;
 
 import com.in6206.security.AuthTokenFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,7 +48,8 @@ public class SecurityConfig {
                 ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/api/auth/signup", "/api/auth/signin", "/login",
-                                "/css/**", "/js/**", "/images/**").permitAll()
+                                "/css/**", "/js/**", "/images/**", "/v3/api-docs/**",
+                                "/swagger-ui/**", "/swagger-ui.html", "/webjars/**").permitAll()
                         .requestMatchers("/api/expenses/**").authenticated()          // Ordinary user API
                         .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN") // Administrator Page + API
                         .anyRequest().authenticated()

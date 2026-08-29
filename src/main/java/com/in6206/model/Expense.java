@@ -17,17 +17,19 @@ public class Expense {
     @Column(name = "amount", precision = 19, scale = 2, nullable = false)
     private BigDecimal amount;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String category;
 
     @Column(nullable = false)
     private LocalDate expenseDate;
 
+    @Column(length = 500)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
     private LocalDate createdAt = LocalDate.now();
 }
