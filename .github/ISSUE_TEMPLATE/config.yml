@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞私密报告
+    url: https://github.com/xyl0619/Expense/security/advisories/new
+    about: 不要公开漏洞细节，请使用 GitHub 私密报告入口。
+

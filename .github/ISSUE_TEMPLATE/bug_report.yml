@@ -1,0 +1,73 @@
+name: Bug 报告
+description: 报告可以稳定复现的错误
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你帮助改进轻账。请先搜索现有 Issue，并删除日志或截图中的账号、令牌、密码和个人账单数据。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已搜索现有 Issue，确认没有相同报告
+          required: true
+        - label: 我没有提交密码、令牌、真实邮箱或个人账单数据
+          required: true
+        - label: 这不是需要私密报告的安全漏洞
+          required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: 运行方式
+      options:
+        - 本地 H2
+        - Docker Compose + MySQL
+        - 其他部署方式
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题描述
+      description: 实际发生了什么？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开……
+        2. 输入……
+        3. 点击……
+        4. 看到……
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+      description: 你原本期待发生什么？
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息
+      value: |
+        - 操作系统：
+        - Java 版本：
+        - 浏览器及版本：
+        - 项目提交或版本：
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 补充材料
+      description: 可粘贴已经移除敏感信息的日志、截图或最小示例。
+

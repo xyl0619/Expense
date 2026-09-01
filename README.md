@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/xyl0619/Expense/actions/workflows/ci.yml/badge.svg)](https://github.com/xyl0619/Expense/actions/workflows/ci.yml)
 
+[贡献指南](CONTRIBUTING.md) · [安全政策](SECURITY.md) · [行为准则](CODE_OF_CONDUCT.md) · [变更记录](CHANGELOG.md)
+
 轻账是一套可直接运行的个人支出与预算管理系统。项目使用 Spring Boot 提供页面、业务接口、权限控制和数据持久化，支持本地 H2 数据库，也支持通过 Docker Compose 运行 MySQL。
 
 界面支持中文和 English。首次打开首页会显示语言选择，选项保存在浏览器中；登录、注册、仪表盘、管理员页面、动态提示和 CSV 表头会统一切换。
@@ -301,7 +303,7 @@ target/expense-tracker-0.0.1-SNAPSHOT.jar
 
 ```text
 Expense/
-├─ .github/                 GitHub Actions 与 Dependabot
+├─ .github/                 CI、Dependabot、Issue/PR 模板与代码负责人
 ├─ .mvn/                    项目级 Maven 连接配置
 ├─ src/main/java/com/in6206/
 │  ├─ config/               安全、OpenAPI、管理员初始化
@@ -357,6 +359,21 @@ mvn spring-boot:run
 ### 切换 Docker 后原来的数据不见了
 
 本地 H2 与 Docker MySQL 是两个独立数据库。切换运行方式不会自动迁移数据。
+
+## 参与公共协作
+
+欢迎通过 GitHub 参与改进：
+
+- 发现可复现错误：使用 [Bug 报告](https://github.com/xyl0619/Expense/issues/new?template=bug_report.yml)
+- 提出明确改进：使用 [功能建议](https://github.com/xyl0619/Expense/issues/new?template=feature_request.yml)
+- 准备提交代码：先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)
+- 报告安全漏洞：按照 [SECURITY.md](SECURITY.md) 使用私密渠道
+- 参与讨论与审查：遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- 查看尚未发布的变化：[CHANGELOG.md](CHANGELOG.md)
+
+Issue 表单会要求运行环境、复现步骤和验收标准；Pull Request 模板会检查测试、双语内容、数据库迁移和敏感信息。所有代码改动默认由 `CODEOWNERS` 指定的维护者审查。
+
+当前仓库尚未选择开源许可证。在根目录加入 `LICENSE` 前，代码可以公开查看和讨论，但请先联系维护者再复制、重新发布或用于其他项目。
 
 ## 持续集成
 
