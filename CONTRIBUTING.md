@@ -7,7 +7,7 @@
 - 普通 Bug 和功能建议请使用仓库提供的 Issue 表单。
 - 安全漏洞不要发布到公开 Issue，请按照 [SECURITY.md](SECURITY.md) 报告。
 - 提交代码即表示你同意遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
-- 当前仓库尚未选择开源许可证；在 `LICENSE` 文件加入前，请不要复制、重新发布或用于其他项目。
+- 本项目使用 [MIT 许可证](LICENSE)；提交贡献即表示你的贡献可以按相同许可证分发。
 
 ## 本地开发
 
@@ -83,4 +83,3 @@ node --check src/main/resources/static/js/admin.js
 - 中英文界面是否同步；
 - 测试、文档和数据库迁移是否与代码一致；
 - 是否包含秘密、个人数据、生成文件或无关改动。
-

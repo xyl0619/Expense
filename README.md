@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/xyl0619/Expense/actions/workflows/ci.yml/badge.svg)](https://github.com/xyl0619/Expense/actions/workflows/ci.yml)
 
-[贡献指南](CONTRIBUTING.md) · [安全政策](SECURITY.md) · [行为准则](CODE_OF_CONDUCT.md) · [变更记录](CHANGELOG.md)
+[贡献指南](CONTRIBUTING.md) · [安全政策](SECURITY.md) · [行为准则](CODE_OF_CONDUCT.md) · [变更记录](CHANGELOG.md) · [MIT 许可证](LICENSE)
 
 轻账是一套可直接运行的个人支出与预算管理系统。项目使用 Spring Boot 提供页面、业务接口、权限控制和数据持久化，支持本地 H2 数据库，也支持通过 Docker Compose 运行 MySQL。
 
@@ -373,7 +373,7 @@ mvn spring-boot:run
 
 Issue 表单会要求运行环境、复现步骤和验收标准；Pull Request 模板会检查测试、双语内容、数据库迁移和敏感信息。所有代码改动默认由 `CODEOWNERS` 指定的维护者审查。
 
-当前仓库尚未选择开源许可证。在根目录加入 `LICENSE` 前，代码可以公开查看和讨论，但请先联系维护者再复制、重新发布或用于其他项目。
+本项目使用 [MIT 许可证](LICENSE)。任何人都可以在保留版权和许可声明的前提下使用、复制、修改、发布和分发本项目。
 
 ## 持续集成
 

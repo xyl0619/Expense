@@ -12,4 +12,4 @@
 - GitHub Actions、Dependabot、自动化测试和协作文档；
 - Bug、功能建议和 Pull Request 模板；
 - 安全报告政策、社区行为准则与代码负责人配置。
-
+- MIT 开源许可证。
