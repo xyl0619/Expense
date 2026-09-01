@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>轻账</title>
+    <title data-i18n="dashboard.title">轻账</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/i18n.js}"></script>
     <script defer th:src="@{/webjars/chart.js/4.4.7/dist/chart.umd.js}"></script>
     <script defer th:src="@{/js/common.js}"></script>
     <script defer th:src="@{/js/dashboard.js}"></script>
@@ -15,14 +16,15 @@
 <header class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <h1>轻账</h1>
-            <p>支出、预算和趋势，一页看清</p>
+            <h1 data-i18n="brand.name">轻账</h1>
+            <p data-i18n="dashboard.tagline">支出、预算和趋势，一页看清</p>
         </div>
         <div class="nav-actions">
+            <div th:replace="~{fragments/language :: switch}"></div>
             <span class="user-label" sec:authentication="name">用户</span>
-            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin}" class="btn ghost">管理</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin}" class="btn ghost" data-i18n="nav.admin">管理</a>
             <form th:action="@{/logout}" method="post">
-                <button type="submit" class="btn ghost">退出</button>
+                <button type="submit" class="btn ghost" data-i18n="nav.logout">退出</button>
             </form>
         </div>
     </div>
@@ -31,72 +33,72 @@
 <main class="page">
     <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
-    <section class="grid summary-grid" aria-label="支出概览">
-        <article class="card metric"><div class="metric-label">总支出</div><div id="total-spend" class="metric-value">¥0.00</div></article>
-        <article class="card metric"><div class="metric-label">平均每笔</div><div id="average-spend" class="metric-value">¥0.00</div></article>
-        <article class="card metric"><div class="metric-label">记录数</div><div id="transaction-count" class="metric-value">0</div></article>
-        <article class="card metric"><div class="metric-label">最高分类</div><div id="top-category" class="metric-value">—</div></article>
+    <section class="grid summary-grid" aria-label="支出概览" data-i18n-aria-label="dashboard.overviewAria">
+        <article class="card metric"><div class="metric-label" data-i18n="dashboard.totalSpend">总支出</div><div id="total-spend" class="metric-value">¥0.00</div></article>
+        <article class="card metric"><div class="metric-label" data-i18n="dashboard.averageSpend">平均每笔</div><div id="average-spend" class="metric-value">¥0.00</div></article>
+        <article class="card metric"><div class="metric-label" data-i18n="dashboard.recordCount">记录数</div><div id="transaction-count" class="metric-value">0</div></article>
+        <article class="card metric"><div class="metric-label" data-i18n="dashboard.topCategory">最高分类</div><div id="top-category" class="metric-value">—</div></article>
     </section>
 
-    <div class="section-heading"><div><h2>分析</h2><p>按条件查看支出变化</p></div></div>
+    <div class="section-heading"><div><h2 data-i18n="dashboard.analytics">分析</h2><p data-i18n="dashboard.analyticsSubtitle">按条件查看支出变化</p></div></div>
     <section class="card panel">
         <div class="toolbar">
-            <div class="field"><label for="filter-from">开始日期</label><input type="date" id="filter-from"></div>
-            <div class="field"><label for="filter-to">结束日期</label><input type="date" id="filter-to"></div>
-            <div class="field"><label for="filter-category">分类</label><input type="text" id="filter-category" placeholder="全部分类"></div>
-            <div class="field compact"><label for="filter-min">最低金额</label><input type="number" id="filter-min" min="0" step="0.01"></div>
-            <div class="field compact"><label for="filter-max">最高金额</label><input type="number" id="filter-max" min="0" step="0.01"></div>
-            <button id="apply-filters" class="btn" type="button">查询</button>
-            <button id="clear-filters" class="btn secondary" type="button">清空</button>
+            <div class="field"><label for="filter-from" data-i18n="dashboard.startDate">开始日期</label><input type="date" id="filter-from"></div>
+            <div class="field"><label for="filter-to" data-i18n="dashboard.endDate">结束日期</label><input type="date" id="filter-to"></div>
+            <div class="field"><label for="filter-category" data-i18n="dashboard.category">分类</label><input type="text" id="filter-category" placeholder="全部分类" data-i18n-placeholder="dashboard.allCategories"></div>
+            <div class="field compact"><label for="filter-min" data-i18n="dashboard.minAmount">最低金额</label><input type="number" id="filter-min" min="0" step="0.01"></div>
+            <div class="field compact"><label for="filter-max" data-i18n="dashboard.maxAmount">最高金额</label><input type="number" id="filter-max" min="0" step="0.01"></div>
+            <button id="apply-filters" class="btn" type="button" data-i18n="dashboard.search">查询</button>
+            <button id="clear-filters" class="btn secondary" type="button" data-i18n="dashboard.clear">清空</button>
         </div>
     </section>
 
     <section class="grid two-column">
         <div class="grid chart-grid">
-            <article class="card chart-box"><h3>分类占比</h3><div class="chart-canvas"><canvas id="category-chart"></canvas></div></article>
-            <article class="card chart-box"><h3>月度趋势</h3><div class="chart-canvas"><canvas id="monthly-chart"></canvas></div></article>
+            <article class="card chart-box"><h3 data-i18n="dashboard.categoryShare">分类占比</h3><div class="chart-canvas"><canvas id="category-chart"></canvas></div></article>
+            <article class="card chart-box"><h3 data-i18n="dashboard.monthlyTrend">月度趋势</h3><div class="chart-canvas"><canvas id="monthly-chart"></canvas></div></article>
         </div>
         <aside class="card panel">
-            <div class="section-heading compact"><div><h2>月度预算</h2><p id="budget-overview">暂无预算</p></div></div>
+            <div class="section-heading compact"><div><h2 data-i18n="dashboard.monthlyBudget">月度预算</h2><p id="budget-overview" data-i18n="dashboard.noBudget">暂无预算</p></div></div>
             <form id="budget-form" class="budget-form">
-                <div class="field"><label for="budget-month">月份</label><input type="month" id="budget-month" required></div>
-                <div class="field"><label for="budget-limit">额度</label><input type="number" id="budget-limit" min="0.01" step="0.01" required></div>
-                <div class="field wide"><label for="budget-category">分类</label><input type="text" id="budget-category" maxlength="100" required></div>
-                <button class="btn wide" type="submit">保存预算</button>
+                <div class="field"><label for="budget-month" data-i18n="dashboard.month">月份</label><input type="month" id="budget-month" required></div>
+                <div class="field"><label for="budget-limit" data-i18n="dashboard.limit">额度</label><input type="number" id="budget-limit" min="0.01" step="0.01" required></div>
+                <div class="field wide"><label for="budget-category" data-i18n="dashboard.category">分类</label><input type="text" id="budget-category" maxlength="100" required></div>
+                <button class="btn wide" type="submit" data-i18n="dashboard.saveBudget">保存预算</button>
             </form>
             <div id="budget-list" class="budget-list"></div>
         </aside>
     </section>
 
     <div class="section-heading">
-        <div><h2>支出记录</h2><p>新增、修改或删除你的记录</p></div>
+        <div><h2 data-i18n="dashboard.expenseRecords">支出记录</h2><p data-i18n="dashboard.expenseSubtitle">新增、修改或删除你的记录</p></div>
         <div class="nav-actions">
-            <a th:href="@{/api/expenses/report}" class="btn secondary" download>导出 CSV</a>
-            <button id="add-expense" class="btn" type="button">新增支出</button>
+            <a th:href="@{/api/expenses/report}" class="btn secondary" download data-i18n="dashboard.exportCsv" data-language-query>导出 CSV</a>
+            <button id="add-expense" class="btn" type="button" data-i18n="dashboard.addExpense">新增支出</button>
         </div>
     </div>
 
     <section id="expense-form-panel" class="card panel form-panel">
         <form id="expense-form" class="expense-form">
             <input type="hidden" id="expense-id">
-            <div class="field"><label for="amount">金额</label><input type="number" id="amount" min="0.01" step="0.01" required></div>
-            <div class="field"><label for="category">分类</label><input type="text" id="category" maxlength="100" required></div>
-            <div class="field"><label for="expense-date">日期</label><input type="date" id="expense-date" required></div>
-            <div class="field description"><label for="description">备注</label><input type="text" id="description" maxlength="500"></div>
-            <div class="form-actions"><button class="btn" type="submit">保存</button><button id="cancel-expense" class="btn secondary" type="button">取消</button></div>
+            <div class="field"><label for="amount" data-i18n="dashboard.amount">金额</label><input type="number" id="amount" min="0.01" step="0.01" required></div>
+            <div class="field"><label for="category" data-i18n="dashboard.category">分类</label><input type="text" id="category" maxlength="100" required></div>
+            <div class="field"><label for="expense-date" data-i18n="dashboard.date">日期</label><input type="date" id="expense-date" required></div>
+            <div class="field description"><label for="description" data-i18n="dashboard.note">备注</label><input type="text" id="description" maxlength="500"></div>
+            <div class="form-actions"><button class="btn" type="submit" data-i18n="dashboard.save">保存</button><button id="cancel-expense" class="btn secondary" type="button" data-i18n="dashboard.cancel">取消</button></div>
         </form>
     </section>
 
     <section class="card">
         <div class="table-wrap">
             <table>
-                <thead><tr><th>日期</th><th>分类</th><th>备注</th><th>金额</th><th>操作</th></tr></thead>
-                <tbody id="expense-rows"><tr><td colspan="5" class="empty">正在加载…</td></tr></tbody>
+                <thead><tr><th data-i18n="dashboard.date">日期</th><th data-i18n="dashboard.category">分类</th><th data-i18n="dashboard.note">备注</th><th data-i18n="dashboard.amount">金额</th><th data-i18n="dashboard.action">操作</th></tr></thead>
+                <tbody id="expense-rows"><tr><td colspan="5" class="empty" data-i18n="dashboard.loading">正在加载…</td></tr></tbody>
             </table>
         </div>
         <div class="pagination">
-            <span id="page-summary">0 条记录</span>
-            <div class="nav-actions"><button id="previous-page" class="btn secondary small" type="button">上一页</button><button id="next-page" class="btn secondary small" type="button">下一页</button></div>
+            <span id="page-summary" data-i18n="dashboard.zeroRecords">0 条记录</span>
+            <div class="nav-actions"><button id="previous-page" class="btn secondary small" type="button" data-i18n="dashboard.previous">上一页</button><button id="next-page" class="btn secondary small" type="button" data-i18n="dashboard.next">下一页</button></div>
         </div>
     </section>
 </main>

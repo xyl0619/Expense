@@ -80,7 +80,8 @@ public class ExpenseController {
     }
 
     @GetMapping("/report")
-    public void downloadReport(HttpServletResponse response) throws IOException {
+    public void downloadReport(@RequestParam(defaultValue = "zh") String lang,
+                               HttpServletResponse response) throws IOException {
         User currentUser = currentUserService.requireCurrentUser();
         List<Expense> expenses = expenseService.getAllExpensesByUser(currentUser.getId());
 
@@ -90,7 +91,9 @@ public class ExpenseController {
 
         PrintWriter writer = response.getWriter();
         writer.write('\ufeff');
-        writer.println("ID,Amount,Category,Date,Description");
+        writer.println("en".equalsIgnoreCase(lang)
+                ? "ID,Amount,Category,Date,Description"
+                : "ID,金额,分类,日期,备注");
         for (Expense e : expenses) {
             writer.printf("%d,%s,%s,%s,%s%n",
                     e.getId(),

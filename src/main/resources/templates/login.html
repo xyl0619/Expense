@@ -3,34 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>登录 · 轻账</title>
+    <title data-i18n="auth.loginTitle">登录 · 轻账</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/i18n.js}"></script>
 </head>
 <body class="auth-body">
 <main class="card auth-card">
+    <div th:replace="~{fragments/language :: switch}"></div>
     <div class="brand">
-        <h1>轻账</h1>
-        <p>清楚记录每一笔，轻松掌握每个月</p>
+        <h1 data-i18n="brand.name">轻账</h1>
+        <p data-i18n="brand.tagline">清楚记录每一笔，轻松掌握每个月</p>
     </div>
 
-    <div th:if="${param.error}" class="notice error show" role="alert">用户名或密码不正确</div>
-    <div th:if="${param.logout}" class="notice success show" role="status">已安全退出</div>
-    <div th:if="${param.registered}" class="notice success show" role="status">注册成功，请登录</div>
+    <div th:if="${param.error}" class="notice error show" role="alert" data-i18n="auth.loginError">用户名或密码不正确</div>
+    <div th:if="${param.logout}" class="notice success show" role="status" data-i18n="auth.loggedOut">已安全退出</div>
+    <div th:if="${param.registered}" class="notice success show" role="status" data-i18n="auth.registered">注册成功，请登录</div>
 
     <form class="auth-form" th:action="@{/login}" method="post">
         <div class="field">
-            <label for="username">用户名</label>
+            <label for="username" data-i18n="auth.username">用户名</label>
             <input id="username" name="username" type="text" autocomplete="username" required autofocus>
         </div>
         <div class="field">
-            <label for="password">密码</label>
+            <label for="password" data-i18n="auth.password">密码</label>
             <input id="password" name="password" type="password" autocomplete="current-password" required>
         </div>
-        <button class="btn" type="submit">登录</button>
+        <button class="btn" type="submit" data-i18n="auth.loginButton">登录</button>
     </form>
 
-    <p class="auth-links">还没有账户？<a th:href="@{/register}">立即注册</a></p>
-    <p class="auth-home"><a th:href="@{/}">← 返回首页</a></p>
+    <p class="auth-links"><span data-i18n="auth.noAccount">还没有账户？</span> <a th:href="@{/register}" data-i18n="auth.registerNow">立即注册</a></p>
+    <p class="auth-home"><a th:href="@{/}" data-i18n="nav.backHome">← 返回首页</a></p>
 </main>
 </body>
 </html>

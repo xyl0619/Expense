@@ -3,37 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>注册 · 轻账</title>
+    <title data-i18n="auth.registerTitle">注册 · 轻账</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/i18n.js}"></script>
 </head>
 <body class="auth-body">
 <main class="card auth-card">
+    <div th:replace="~{fragments/language :: switch}"></div>
     <div class="brand">
-        <h1>创建账户</h1>
-        <p>只需三项信息，不收集多余资料</p>
+        <h1 data-i18n="auth.createAccount">创建账户</h1>
+        <p data-i18n="auth.createSubtitle">只需三项信息，不收集多余资料</p>
     </div>
 
     <form class="auth-form" th:action="@{/register}" th:object="${signup}" method="post">
         <ul th:if="${#fields.hasAnyErrors()}" class="form-errors" role="alert">
-            <li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li>
+            <li th:each="error : ${#fields.allErrors()}" th:text="${error}" data-validation-message></li>
         </ul>
         <div class="field">
-            <label for="username">用户名</label>
+            <label for="username" data-i18n="auth.username">用户名</label>
             <input id="username" type="text" th:field="*{username}" minlength="3" maxlength="20" autocomplete="username" required autofocus>
         </div>
         <div class="field">
-            <label for="email">邮箱</label>
+            <label for="email" data-i18n="auth.email">邮箱</label>
             <input id="email" type="email" th:field="*{email}" maxlength="50" autocomplete="email" required>
         </div>
         <div class="field">
-            <label for="password">密码</label>
+            <label for="password" data-i18n="auth.password">密码</label>
             <input id="password" type="password" th:field="*{password}" minlength="8" maxlength="40" autocomplete="new-password" required>
         </div>
-        <button class="btn" type="submit">创建账户</button>
+        <button class="btn" type="submit" data-i18n="auth.createAccount">创建账户</button>
     </form>
 
-    <p class="auth-links">已有账户？<a th:href="@{/login}">返回登录</a></p>
-    <p class="auth-home"><a th:href="@{/}">← 返回首页</a></p>
+    <p class="auth-links"><span data-i18n="auth.hasAccount">已有账户？</span> <a th:href="@{/login}" data-i18n="auth.backLogin">返回登录</a></p>
+    <p class="auth-home"><a th:href="@{/}" data-i18n="nav.backHome">← 返回首页</a></p>
 </main>
 </body>
 </html>

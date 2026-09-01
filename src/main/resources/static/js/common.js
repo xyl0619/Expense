@@ -1,4 +1,5 @@
 (() => {
+    const { getLanguage, locale, localizeMessage, t } = window.ExpenseI18n;
     const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
@@ -12,15 +13,17 @@
         const response = await fetch(url, { ...options, headers, credentials: 'same-origin' });
         if (response.status === 401 || (response.redirected && response.url.includes('/login'))) {
             window.location.assign('/login');
-            throw new Error('登录状态已失效');
+            throw new Error(t('common.sessionExpired'));
         }
 
         const contentType = response.headers.get('content-type') || '';
         const body = contentType.includes('application/json') ? await response.json() : null;
         if (!response.ok) {
-            let message = body?.message || `请求失败（${response.status}）`;
+            let message = localizeMessage(body?.message) || t('common.requestFailed', { status: response.status });
             if (body?.fieldErrors && Object.keys(body.fieldErrors).length) {
-                message += '：' + Object.values(body.fieldErrors).join('，');
+                const separator = getLanguage() === 'zh' ? '，' : ', ';
+                message += (getLanguage() === 'zh' ? '：' : ': ') +
+                        Object.values(body.fieldErrors).map(localizeMessage).join(separator);
             }
             throw new Error(message);
         }
@@ -36,6 +39,12 @@
     window.ExpenseApp = {
         api,
         escapeHtml,
-        currency: new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' })
+        t,
+        currency: {
+            format: value => new Intl.NumberFormat(locale(), {
+                style: 'currency',
+                currency: 'CNY'
+            }).format(value)
+        }
     };
 })();

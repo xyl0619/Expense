@@ -3,99 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>轻账 · 让每一笔支出都有答案</title>
+    <title data-i18n="index.title">轻账 · 让每一笔支出都有答案</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/i18n.js}"></script>
 </head>
 <body class="landing-body">
 <header class="landing-nav">
-    <a class="landing-brand" th:href="@{/}" aria-label="轻账首页">
-        <span class="brand-mark">轻</span>
-        <span>轻账</span>
+    <a class="landing-brand" th:href="@{/}" aria-label="轻账首页" data-i18n-aria-label="index.homeAria">
+        <span class="brand-mark" data-i18n="brand.mark">轻</span>
+        <span data-i18n="brand.name">轻账</span>
     </a>
-    <nav class="landing-actions" aria-label="账户入口">
-        <a class="text-link" th:href="@{/login}">登录</a>
-        <a class="btn" th:href="@{/register}">免费开始</a>
+    <nav class="landing-actions" aria-label="账户入口" data-i18n-aria-label="nav.account">
+        <div th:replace="~{fragments/language :: switch}"></div>
+        <a class="text-link" th:href="@{/login}" data-i18n="nav.login">登录</a>
+        <a class="btn" th:href="@{/register}" data-i18n="nav.register">免费开始</a>
     </nav>
 </header>
+
+<section class="language-welcome" data-language-welcome hidden role="dialog" aria-modal="true" aria-labelledby="language-welcome-title">
+    <div class="language-welcome-card">
+        <span class="language-welcome-mark">文 / A</span>
+        <h2 id="language-welcome-title">选择语言 / Choose your language</h2>
+        <p>请选择网站语言 · Select your preferred language</p>
+        <div class="language-welcome-actions">
+            <button type="button" data-language="zh"><strong>中文</strong><span>继续使用中文</span></button>
+            <button type="button" data-language="en"><strong>English</strong><span>Continue in English</span></button>
+        </div>
+    </div>
+</section>
 
 <main>
     <section class="hero">
         <div class="hero-copy">
-            <div class="eyebrow"><span></span> 简单、清楚、只保留有用信息</div>
-            <h1>把每一笔支出，<br><em>变成可行动的判断</em></h1>
-            <p>记录日常支出、设置分类预算、查看月度趋势。无需复杂配置，注册后即可开始。</p>
+            <div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="index.heroEyebrow">简单、清楚、只保留有用信息</span></div>
+            <h1><span data-i18n="index.heroTitleStart">把每一笔支出，</span><br><em data-i18n="index.heroTitleEnd">变成可行动的判断</em></h1>
+            <p data-i18n="index.heroDescription">记录日常支出、设置分类预算、查看月度趋势。无需复杂配置，注册后即可开始。</p>
             <div class="hero-actions">
-                <a class="btn hero-primary" th:href="@{/register}">创建我的账本 <span>→</span></a>
-                <a class="btn hero-secondary" th:href="@{/login}">已有账户，去登录</a>
+                <a class="btn hero-primary" th:href="@{/register}"><span data-i18n="index.createLedger">创建我的账本</span><span>→</span></a>
+                <a class="btn hero-secondary" th:href="@{/login}" data-i18n="index.existingLogin">已有账户，去登录</a>
             </div>
             <div class="hero-points">
-                <span>✓ 本地保存</span>
-                <span>✓ 分类预算</span>
-                <span>✓ CSV 导出</span>
+                <span data-i18n="index.pointLocal">✓ 本地保存</span>
+                <span data-i18n="index.pointBudget">✓ 分类预算</span>
+                <span data-i18n="index.pointCsv">✓ CSV 导出</span>
             </div>
         </div>
 
-        <div class="product-preview" aria-label="轻账仪表盘预览">
+        <div class="product-preview" aria-label="轻账仪表盘预览" data-i18n-aria-label="index.previewAria">
             <div class="preview-topbar">
-                <div><strong>九月概览</strong><small>今天的财务状态</small></div>
+                <div><strong data-i18n="index.septemberOverview">九月概览</strong><small data-i18n="index.todayStatus">今天的财务状态</small></div>
                 <span class="preview-avatar">S</span>
             </div>
             <div class="preview-metrics">
-                <article><span>本月支出</span><strong>¥4,286</strong><small class="down">较上月 ↓ 12%</small></article>
-                <article><span>预算剩余</span><strong>¥2,714</strong><small>总预算 ¥7,000</small></article>
-                <article><span>记录笔数</span><strong>38</strong><small>平均 ¥112.79</small></article>
+                <article><span data-i18n="index.monthSpend">本月支出</span><strong>¥4,286</strong><small class="down" data-i18n="index.monthComparison">较上月 ↓ 12%</small></article>
+                <article><span data-i18n="index.budgetRemaining">预算剩余</span><strong>¥2,714</strong><small data-i18n="index.totalBudget">总预算 ¥7,000</small></article>
+                <article><span data-i18n="index.recordCount">记录笔数</span><strong>38</strong><small data-i18n="index.average">平均 ¥112.79</small></article>
             </div>
             <div class="preview-content">
                 <article class="preview-chart">
-                    <div class="preview-title"><strong>支出趋势</strong><span>近 6 个月</span></div>
+                    <div class="preview-title"><strong data-i18n="index.expenseTrend">支出趋势</strong><span data-i18n="index.sixMonths">近 6 个月</span></div>
                     <div class="chart-bars" aria-hidden="true">
                         <i style="--h:48%"></i><i style="--h:65%"></i><i style="--h:42%"></i>
                         <i style="--h:82%"></i><i style="--h:70%"></i><i class="active" style="--h:55%"></i>
                     </div>
-                    <div class="chart-labels"><span>4月</span><span>5月</span><span>6月</span><span>7月</span><span>8月</span><span>9月</span></div>
+                    <div class="chart-labels"><span data-i18n="index.monthApr">4月</span><span data-i18n="index.monthMay">5月</span><span data-i18n="index.monthJun">6月</span><span data-i18n="index.monthJul">7月</span><span data-i18n="index.monthAug">8月</span><span data-i18n="index.monthSep">9月</span></div>
                 </article>
                 <article class="preview-budget">
-                    <div class="preview-title"><strong>预算进度</strong><span>61%</span></div>
-                    <div class="budget-ring"><span>¥4,286<small>已使用</small></span></div>
-                    <div class="budget-legend"><span><i></i>已使用</span><span><i></i>剩余</span></div>
+                    <div class="preview-title"><strong data-i18n="index.budgetProgress">预算进度</strong><span>61%</span></div>
+                    <div class="budget-ring"><span>¥4,286<small data-i18n="index.used">已使用</small></span></div>
+                    <div class="budget-legend"><span><i></i><span data-i18n="index.used">已使用</span></span><span><i></i><span data-i18n="index.remaining">剩余</span></span></div>
                 </article>
             </div>
             <div class="preview-table">
-                <div class="preview-title"><strong>最近支出</strong><span>查看全部</span></div>
-                <div class="preview-row"><span class="category-icon food">餐</span><div><strong>午餐</strong><small>餐饮 · 今天</small></div><b>− ¥36.00</b></div>
-                <div class="preview-row"><span class="category-icon ride">行</span><div><strong>地铁通勤</strong><small>交通 · 今天</small></div><b>− ¥6.00</b></div>
+                <div class="preview-title"><strong data-i18n="index.recentExpenses">最近支出</strong><span data-i18n="index.viewAll">查看全部</span></div>
+                <div class="preview-row"><span class="category-icon food" data-i18n="index.foodIcon">餐</span><div><strong data-i18n="index.lunch">午餐</strong><small data-i18n="index.foodToday">餐饮 · 今天</small></div><b>− ¥36.00</b></div>
+                <div class="preview-row"><span class="category-icon ride" data-i18n="index.transitIcon">行</span><div><strong data-i18n="index.metro">地铁通勤</strong><small data-i18n="index.transitToday">交通 · 今天</small></div><b>− ¥6.00</b></div>
             </div>
         </div>
     </section>
 
     <section class="feature-section">
         <div class="section-intro">
-            <span>少一点复杂，多一点清楚</span>
-            <h2>需要的能力，一个都不少</h2>
+            <span data-i18n="index.featureEyebrow">少一点复杂，多一点清楚</span>
+            <h2 data-i18n="index.featureTitle">需要的能力，一个都不少</h2>
         </div>
         <div class="feature-grid">
             <article>
                 <span class="feature-number">01</span>
-                <h3>快速记账</h3>
-                <p>金额、分类、日期和备注，四项信息即可完成一笔记录。</p>
+                <h3 data-i18n="index.quickRecord">快速记账</h3>
+                <p data-i18n="index.quickRecordDescription">金额、分类、日期和备注，四项信息即可完成一笔记录。</p>
             </article>
             <article>
                 <span class="feature-number">02</span>
-                <h3>预算提醒</h3>
-                <p>按月份和分类设置额度，超支状态清楚可见。</p>
+                <h3 data-i18n="index.budgetAlert">预算提醒</h3>
+                <p data-i18n="index.budgetAlertDescription">按月份和分类设置额度，超支状态清楚可见。</p>
             </article>
             <article>
                 <span class="feature-number">03</span>
-                <h3>趋势分析</h3>
-                <p>分类占比与月度变化自动汇总，不再手工计算。</p>
+                <h3 data-i18n="index.trendAnalysis">趋势分析</h3>
+                <p data-i18n="index.trendAnalysisDescription">分类占比与月度变化自动汇总，不再手工计算。</p>
             </article>
         </div>
     </section>
 </main>
 
 <footer class="landing-footer">
-    <span>轻账 Expense Intelligence</span>
-    <span>数据保存在你的本地环境</span>
+    <span data-i18n="index.footerBrand">轻账 Expense Intelligence</span>
+    <span data-i18n="index.footerStorage">数据保存在你的本地环境</span>
 </footer>
 </body>
 </html>

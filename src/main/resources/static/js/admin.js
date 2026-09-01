@@ -1,5 +1,5 @@
 (() => {
-    const { api, currency, escapeHtml } = window.ExpenseApp;
+    const { api, currency, escapeHtml, t } = window.ExpenseApp;
     const byId = id => document.getElementById(id);
     let expenses = [];
     let categoryChart;
@@ -18,7 +18,7 @@
         const users = await api('/api/admin/users');
         const list = byId('users-list');
         if (!users.length) {
-            list.innerHTML = '<tr><td colspan="5" class="empty">暂无用户</td></tr>';
+            list.innerHTML = `<tr><td colspan="5" class="empty">${t('dynamic.noUsers')}</td></tr>`;
             return;
         }
         list.innerHTML = users.map(user => {
@@ -28,8 +28,8 @@
                 <td>${user.id}</td>
                 <td>${escapeHtml(user.username)}</td>
                 <td>${escapeHtml(user.email)}</td>
-                <td>${isAdmin ? '管理员' : '普通用户'}</td>
-                <td>${isAdmin ? '受保护' : `<button class="btn danger small" type="button" data-delete-user="${user.id}">删除</button>`}</td>
+                <td>${t(isAdmin ? 'dynamic.administrator' : 'dynamic.regularUser')}</td>
+                <td>${isAdmin ? t('dynamic.protected') : `<button class="btn danger small" type="button" data-delete-user="${user.id}">${t('dynamic.delete')}</button>`}</td>
             </tr>`;
         }).join('');
     }
@@ -38,7 +38,7 @@
         expenses = await api('/api/admin/expenses/report');
         const list = byId('report-list');
         if (!expenses.length) {
-            list.innerHTML = '<tr><td colspan="6" class="empty">暂无支出</td></tr>';
+            list.innerHTML = `<tr><td colspan="6" class="empty">${t('dynamic.noExpenses')}</td></tr>`;
         } else {
             list.innerHTML = expenses.map(expense => `
                 <tr>
@@ -58,7 +58,7 @@
         const categoryTotals = new Map();
         const monthlyTotals = new Map();
         expenses.forEach(expense => {
-            const category = expense.category || '未分类';
+            const category = expense.category || t('dynamic.uncategorized');
             const month = expense.expenseDate.slice(0, 7);
             categoryTotals.set(category, (categoryTotals.get(category) || 0) + Number(expense.amount));
             monthlyTotals.set(month, (monthlyTotals.get(month) || 0) + Number(expense.amount));
@@ -89,9 +89,9 @@
     }
 
     async function deleteUser(id) {
-        if (!window.confirm('删除用户会同时删除其支出和预算，确定继续吗？')) return;
+        if (!window.confirm(t('dynamic.deleteUserConfirm'))) return;
         await api(`/api/admin/users/${id}`, { method: 'DELETE' });
-        showNotice('用户已删除', 'success');
+        showNotice(t('dynamic.userDeleted'), 'success');
         await refresh();
     }
 
@@ -103,13 +103,15 @@
 
     function exportCsv() {
         if (!expenses.length) {
-            showNotice('没有可导出的支出');
+            showNotice(t('dynamic.noExportData'));
             return;
         }
         const rows = expenses.map(expense => [
             expense.id, expense.username, expense.amount, expense.category, expense.expenseDate, expense.description || ''
         ].map(csvCell).join(','));
-        const csv = '\ufeffID,用户,金额,分类,日期,备注\n' + rows.join('\n');
+        const headers = ['ID', t('admin.user'), t('dashboard.amount'), t('dashboard.category'),
+            t('dashboard.date'), t('dashboard.note')].map(csvCell).join(',');
+        const csv = `\ufeff${headers}\n` + rows.join('\n');
         const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
         const link = document.createElement('a');
         link.href = url;
@@ -125,5 +127,6 @@
         if (button) deleteUser(button.dataset.deleteUser).catch(error => showNotice(error.message));
     });
 
+    window.addEventListener('expense-language-changed', refresh);
     refresh();
 })();

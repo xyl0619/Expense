@@ -1,5 +1,5 @@
 (() => {
-    const { api, currency, escapeHtml } = window.ExpenseApp;
+    const { api, currency, escapeHtml, t } = window.ExpenseApp;
     const byId = id => document.getElementById(id);
     const state = { page: 0, totalPages: 0, expenses: [] };
     let categoryChart;
@@ -51,13 +51,17 @@
         const page = await api(`/api/expenses/search?${filterParams(true)}`);
         state.expenses = page.content;
         state.totalPages = page.totalPages;
-        byId('page-summary').textContent = `${page.totalElements} 条记录 · 第 ${page.totalPages ? page.number + 1 : 0}/${page.totalPages} 页`;
+        byId('page-summary').textContent = t('dynamic.pageSummary', {
+            total: page.totalElements,
+            current: page.totalPages ? page.number + 1 : 0,
+            pages: page.totalPages
+        });
         byId('previous-page').disabled = page.first;
         byId('next-page').disabled = page.last || page.totalPages === 0;
 
         const rows = byId('expense-rows');
         if (!page.content.length) {
-            rows.innerHTML = '<tr><td colspan="5" class="empty">没有符合条件的记录</td></tr>';
+            rows.innerHTML = `<tr><td colspan="5" class="empty">${t('dynamic.noMatchingExpenses')}</td></tr>`;
             return;
         }
         rows.innerHTML = page.content.map(expense => `
@@ -67,8 +71,8 @@
                 <td>${escapeHtml(expense.description || '—')}</td>
                 <td class="amount">${currency.format(Number(expense.amount))}</td>
                 <td><div class="actions">
-                    <button class="btn secondary small" type="button" data-edit-expense="${expense.id}">编辑</button>
-                    <button class="btn danger small" type="button" data-delete-expense="${expense.id}">删除</button>
+                    <button class="btn secondary small" type="button" data-edit-expense="${expense.id}">${t('dynamic.edit')}</button>
+                    <button class="btn danger small" type="button" data-delete-expense="${expense.id}">${t('dynamic.delete')}</button>
                 </div></td>
             </tr>`).join('');
     }
@@ -105,7 +109,7 @@
             type: 'bar',
             data: {
                 labels: summary.monthlyTrend.map(item => item.month),
-                datasets: [{ label: '支出', data: summary.monthlyTrend.map(item => Number(item.totalAmount)), backgroundColor: '#4f46e5', borderRadius: 5 }]
+                datasets: [{ label: t('dynamic.expenseDataset'), data: summary.monthlyTrend.map(item => Number(item.totalAmount)), backgroundColor: '#4f46e5', borderRadius: 5 }]
             },
             options: {
                 responsive: true,
@@ -122,13 +126,13 @@
         byId('budget-overview').textContent = `${currency.format(Number(overview.totalSpent))} / ${currency.format(Number(overview.totalLimit))}`;
         const list = byId('budget-list');
         if (!overview.budgets.length) {
-            list.innerHTML = '<div class="empty">尚未设置该月预算</div>';
+            list.innerHTML = `<div class="empty">${t('dynamic.noMonthlyBudget')}</div>`;
             return;
         }
         list.innerHTML = overview.budgets.map(budget => {
             const width = Math.min(Number(budget.utilizationPercent), 100);
             return `<div class="budget-item">
-                <div class="budget-row"><div><div class="budget-title">${escapeHtml(budget.category)}</div><div class="budget-detail">${currency.format(Number(budget.spentAmount))} / ${currency.format(Number(budget.limitAmount))}</div></div><button class="btn secondary small" type="button" data-delete-budget="${budget.id}">删除</button></div>
+                <div class="budget-row"><div><div class="budget-title">${escapeHtml(budget.category)}</div><div class="budget-detail">${currency.format(Number(budget.spentAmount))} / ${currency.format(Number(budget.limitAmount))}</div></div><button class="btn secondary small" type="button" data-delete-budget="${budget.id}">${t('dynamic.delete')}</button></div>
                 <div class="progress"><span class="${budget.exceeded ? 'exceeded' : ''}" style="width:${width}%"></span></div>
             </div>`;
         }).join('');
@@ -151,16 +155,16 @@
     }
 
     async function deleteExpense(id) {
-        if (!window.confirm('确定删除这条支出吗？')) return;
+        if (!window.confirm(t('dynamic.deleteExpenseConfirm'))) return;
         await api(`/api/expenses/${id}`, { method: 'DELETE' });
-        showNotice('支出已删除', 'success');
+        showNotice(t('dynamic.expenseDeleted'), 'success');
         await refresh();
     }
 
     async function deleteBudget(id) {
-        if (!window.confirm('确定删除这项预算吗？')) return;
+        if (!window.confirm(t('dynamic.deleteBudgetConfirm'))) return;
         await api(`/api/budgets/${id}`, { method: 'DELETE' });
-        showNotice('预算已删除', 'success');
+        showNotice(t('dynamic.budgetDeleted'), 'success');
         await loadBudgets();
     }
 
@@ -220,7 +224,7 @@
                 body: JSON.stringify(payload)
             });
             closeExpenseForm();
-            showNotice(id ? '支出已更新' : '支出已添加', 'success');
+            showNotice(t(id ? 'dynamic.expenseUpdated' : 'dynamic.expenseAdded'), 'success');
             await refresh();
         } catch (error) {
             showNotice(error.message);
@@ -242,7 +246,7 @@
             });
             byId('budget-category').value = '';
             byId('budget-limit').value = '';
-            showNotice('预算已保存', 'success');
+            showNotice(t('dynamic.budgetSaved'), 'success');
             await loadBudgets();
         } catch (error) {
             showNotice(error.message);
@@ -252,8 +256,9 @@
     byId('budget-month').value = localDate().slice(0, 7);
     const pageParams = new URLSearchParams(window.location.search);
     if (pageParams.has('forbidden')) {
-        showNotice('当前账号没有管理员权限');
+        showNotice(t('dynamic.forbidden'));
         window.history.replaceState({}, '', '/dashboard');
     }
+    window.addEventListener('expense-language-changed', refresh);
     refresh();
 })();

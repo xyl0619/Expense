@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>管理 · 轻账</title>
+    <title data-i18n="admin.title">管理 · 轻账</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/i18n.js}"></script>
     <script defer th:src="@{/webjars/chart.js/4.4.7/dist/chart.umd.js}"></script>
     <script defer th:src="@{/js/common.js}"></script>
     <script defer th:src="@{/js/admin.js}"></script>
@@ -14,10 +15,11 @@
 <body>
 <header class="topbar">
     <div class="topbar-inner">
-        <div class="brand"><h1>管理中心</h1><p>用户与全局支出概览</p></div>
+        <div class="brand"><h1 data-i18n="admin.center">管理中心</h1><p data-i18n="admin.tagline">用户与全局支出概览</p></div>
         <div class="nav-actions">
-            <a th:href="@{/dashboard}" class="btn ghost">返回首页</a>
-            <form th:action="@{/logout}" method="post"><button class="btn ghost" type="submit">退出</button></form>
+            <div th:replace="~{fragments/language :: switch}"></div>
+            <a th:href="@{/dashboard}" class="btn ghost" data-i18n="nav.backDashboard">返回仪表盘</a>
+            <form th:action="@{/logout}" method="post"><button class="btn ghost" type="submit" data-i18n="nav.logout">退出</button></form>
         </div>
     </div>
 </header>
@@ -25,30 +27,30 @@
 <main class="page">
     <div id="notice" class="notice" role="status" aria-live="polite"></div>
     <div class="section-heading">
-        <div><h2>用户</h2><p>查看账户并删除不再需要的用户</p></div>
-        <button id="refresh-admin" class="btn" type="button">刷新</button>
+        <div><h2 data-i18n="admin.users">用户</h2><p data-i18n="admin.usersSubtitle">查看账户并删除不再需要的用户</p></div>
+        <button id="refresh-admin" class="btn" type="button" data-i18n="admin.refresh">刷新</button>
     </div>
     <section class="card table-wrap">
         <table>
-            <thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>身份</th><th>操作</th></tr></thead>
-            <tbody id="users-list"><tr><td colspan="5" class="empty">正在加载…</td></tr></tbody>
+            <thead><tr><th>ID</th><th data-i18n="auth.username">用户名</th><th data-i18n="admin.email">邮箱</th><th data-i18n="admin.role">身份</th><th data-i18n="dashboard.action">操作</th></tr></thead>
+            <tbody id="users-list"><tr><td colspan="5" class="empty" data-i18n="dashboard.loading">正在加载…</td></tr></tbody>
         </table>
     </section>
 
     <div class="section-heading">
-        <div><h2>全部支出</h2><p>所有用户的汇总记录</p></div>
-        <button id="export-admin" class="btn secondary" type="button">导出 CSV</button>
+        <div><h2 data-i18n="admin.allExpenses">全部支出</h2><p data-i18n="admin.expensesSubtitle">所有用户的汇总记录</p></div>
+        <button id="export-admin" class="btn secondary" type="button" data-i18n="dashboard.exportCsv">导出 CSV</button>
     </div>
     <section class="card table-wrap">
         <table>
-            <thead><tr><th>ID</th><th>用户</th><th>金额</th><th>分类</th><th>日期</th><th>备注</th></tr></thead>
-            <tbody id="report-list"><tr><td colspan="6" class="empty">正在加载…</td></tr></tbody>
+            <thead><tr><th>ID</th><th data-i18n="admin.user">用户</th><th data-i18n="dashboard.amount">金额</th><th data-i18n="dashboard.category">分类</th><th data-i18n="dashboard.date">日期</th><th data-i18n="dashboard.note">备注</th></tr></thead>
+            <tbody id="report-list"><tr><td colspan="6" class="empty" data-i18n="dashboard.loading">正在加载…</td></tr></tbody>
         </table>
     </section>
 
     <section class="grid admin-grid admin-section">
-        <article class="card chart-box"><h3>分类占比</h3><div class="chart-canvas"><canvas id="admin-category-chart"></canvas></div></article>
-        <article class="card chart-box"><h3>月度趋势</h3><div class="chart-canvas"><canvas id="admin-monthly-chart"></canvas></div></article>
+        <article class="card chart-box"><h3 data-i18n="dashboard.categoryShare">分类占比</h3><div class="chart-canvas"><canvas id="admin-category-chart"></canvas></div></article>
+        <article class="card chart-box"><h3 data-i18n="dashboard.monthlyTrend">月度趋势</h3><div class="chart-canvas"><canvas id="admin-monthly-chart"></canvas></div></article>
     </section>
 </main>
 </body>

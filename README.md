@@ -4,11 +4,14 @@
 
 轻账是一套可直接运行的个人支出与预算管理系统。项目使用 Spring Boot 提供页面、业务接口、权限控制和数据持久化，支持本地 H2 数据库，也支持通过 Docker Compose 运行 MySQL。
 
+界面支持中文和 English。首次打开首页会显示语言选择，选项保存在浏览器中；登录、注册、仪表盘、管理员页面、动态提示和 CSV 表头会统一切换。
+
 ## 功能概览
 
 ### 普通用户
 
 - 注册、登录和退出
+- 首次选择中文或 English，并可在任意页面随时切换
 - 新增、编辑、删除个人支出
 - 按日期、分类和金额筛选支出
 - 分页查看记录并导出 CSV
@@ -82,6 +85,8 @@ mvn spring-boot:run
 - 登录：<http://localhost:8080/login>
 - 注册：<http://localhost:8080/register>
 - Swagger：<http://localhost:8080/swagger-ui.html>
+
+第一次打开首页时选择“中文”或“English”。之后页面会记住选择；如需更改，使用页面右上角的语言切换按钮。
 
 默认使用本地 H2 文件数据库，不需要安装 MySQL。数据保存在：
 
@@ -309,7 +314,7 @@ Expense/
 │  └─ service/              业务与权限规则
 ├─ src/main/resources/
 │  ├─ db/migration/         MySQL Flyway 迁移
-│  ├─ static/               CSS 与 JavaScript
+│  ├─ static/               CSS、业务脚本与统一双语词典
 │  ├─ templates/            Thymeleaf 页面
 │  ├─ application.yml       默认 H2 配置
 │  └─ application-mysql.yml MySQL Profile
