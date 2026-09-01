@@ -1,7 +1,5 @@
 package com.in6206.controller;
 
-import com.in6206.model.User;
-import com.in6206.payload.JwtResponse;
 import com.in6206.payload.LoginRequest;
 import com.in6206.payload.SignupRequest;
 import com.in6206.service.UserService;
@@ -14,12 +12,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -40,16 +36,12 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication.getName());
-        Map<String, String> response = new HashMap<>();
-        response.put("token", jwt);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("token", jwt));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
-        User user = userService.registerUser(signupRequest);
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "User registered successfully!");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, String>> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+        userService.registerUser(signupRequest);
+        return ResponseEntity.ok(Map.of("message", "User registered successfully!"));
     }
 }

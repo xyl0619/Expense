@@ -1,113 +1,36 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org", xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Expense Tracker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .alert {
-            color: red;
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .links {
-            text-align: center;
-            margin-top: 15px;
-        }
-        .links a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .links a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登录 · 轻账</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body>
-<div class="login-container">
-    <h2>Login</h2>
-
-    <!-- Display the error parameters automatically added by Spring Security -->
-    <div th:if="${param.error}" class="alert">
-        Invalid username or password.
-    </div>
-    <div th:if="${param.logout}" class="alert" style="color:green;">
-        You have been logged out.
+<body class="auth-body">
+<main class="card auth-card">
+    <div class="brand">
+        <h1>轻账</h1>
+        <p>清楚记录每一笔，轻松掌握每个月</p>
     </div>
 
-    <!-- Remove JS and submit using native forms -->
-    <form th:action="@{/login}" method="post">
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required autofocus />
+    <div th:if="${param.error}" class="notice error show" role="alert">用户名或密码不正确</div>
+    <div th:if="${param.logout}" class="notice success show" role="status">已安全退出</div>
+    <div th:if="${param.registered}" class="notice success show" role="status">注册成功，请登录</div>
+
+    <form class="auth-form" th:action="@{/login}" method="post">
+        <div class="field">
+            <label for="username">用户名</label>
+            <input id="username" name="username" type="text" autocomplete="username" required autofocus>
         </div>
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required />
+        <div class="field">
+            <label for="password">密码</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
         </div>
-        <button type="submit">Sign In</button>
+        <button class="btn" type="submit">登录</button>
     </form>
 
-
-    <div class="links">
-        <p>Don't have an account? <a href="/register">Register here</a></p>
-    </div>
-
-</div>
-
+    <p class="auth-links">还没有账户？<a th:href="@{/register}">立即注册</a></p>
+    <p class="auth-home"><a th:href="@{/}">← 返回首页</a></p>
+</main>
 </body>
 </html>

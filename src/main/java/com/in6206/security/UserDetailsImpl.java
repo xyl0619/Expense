@@ -1,27 +1,25 @@
 package com.in6206.security;
 
 import com.in6206.model.User;
-import com.in6206.model.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 public class UserDetailsImpl implements UserDetails {
-    private Long id;
-    private String username;
-    private String email;
-    private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private final Long id;
+    private final String username;
+    private final String email;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
 
-
-
-    public UserDetailsImpl(Long id, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(Long id,
+                           String username,
+                           String email,
+                           String password,
+                           Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -31,8 +29,8 @@ public class UserDetailsImpl implements UserDetails {
 
     public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority( role.getName()))
-                .collect(Collectors.toList());
+                .<GrantedAuthority>map(role -> new SimpleGrantedAuthority(role.getName()))
+                .toList();
 
         return new UserDetailsImpl(
                 user.getId(),
@@ -85,8 +83,4 @@ public class UserDetailsImpl implements UserDetails {
     public String getEmail() {
         return email;
     }
-
-
-
-
 }

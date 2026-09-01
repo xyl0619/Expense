@@ -1,456 +1,104 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>Expense Intelligence</title>
-    <script src="/webjars/chart.js/4.4.7/dist/chart.umd.js"></script>
-    <style>
-        :root {
-            --ink: #172033;
-            --muted: #667085;
-            --line: #e4e7ec;
-            --surface: #ffffff;
-            --canvas: #f4f6fa;
-            --brand: #4f46e5;
-            --brand-dark: #3730a3;
-            --success: #12805c;
-            --danger: #c4324a;
-            --warning: #c97912;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            color: var(--ink);
-            background: var(--canvas);
-            font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-        button, input { font: inherit; }
-        .topbar {
-            color: white;
-            background: linear-gradient(120deg, #111827, #312e81 70%, #4f46e5);
-            box-shadow: 0 8px 30px rgba(23, 32, 51, .18);
-        }
-        .topbar-inner, main { width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
-        .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-        .brand h1 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
-        .brand p { margin: 2px 0 0; color: #c7d2fe; font-size: 12px; }
-        .nav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        main { padding: 28px 0 48px; }
-        .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 26px 0 12px; }
-        .section-heading h2 { margin: 0; font-size: 18px; }
-        .section-heading p { margin: 3px 0 0; color: var(--muted); }
-        .grid { display: grid; gap: 16px; }
-        .summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        .two-column { grid-template-columns: minmax(0, 1.45fr) minmax(320px, .55fr); }
-        .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(16, 24, 40, .05);
-        }
-        .metric { padding: 18px; position: relative; overflow: hidden; }
-        .metric::after { content: ""; position: absolute; right: -20px; top: -24px; width: 86px; height: 86px; border-radius: 50%; background: #eef2ff; }
-        .metric-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
-        .metric-value { margin-top: 8px; font-size: 25px; font-weight: 750; letter-spacing: -.03em; position: relative; z-index: 1; }
-        .panel { padding: 18px; }
-        .toolbar { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
-        .field { min-width: 135px; flex: 1; }
-        .field.compact { min-width: 110px; }
-        label { display: block; color: #344054; font-size: 12px; font-weight: 650; margin-bottom: 5px; }
-        input {
-            width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #d0d5dd;
-            border-radius: 8px; color: var(--ink); background: white; outline: none;
-        }
-        input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79, 70, 229, .12); }
-        .btn {
-            min-height: 38px; padding: 8px 13px; border: 0; border-radius: 8px; cursor: pointer;
-            color: white; background: var(--brand); font-weight: 650; text-decoration: none; display: inline-flex;
-            align-items: center; justify-content: center; transition: .15s ease;
-        }
-        .btn:hover { background: var(--brand-dark); transform: translateY(-1px); }
-        .btn.secondary { color: #344054; background: #f2f4f7; }
-        .btn.secondary:hover { background: #e4e7ec; }
-        .btn.danger { background: var(--danger); }
-        .btn.ghost { background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.2); }
-        .btn.small { min-height: 30px; padding: 5px 9px; font-size: 12px; }
-        .chart-box { height: 290px; padding: 16px; }
-        .chart-box h3 { margin: 0 0 12px; font-size: 14px; }
-        .chart-canvas { height: 235px; position: relative; }
-        .budget-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .budget-form .wide { grid-column: 1 / -1; }
-        .budget-list { display: grid; gap: 10px; margin-top: 16px; }
-        .budget-item { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
-        .budget-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
-        .budget-title { font-weight: 700; }
-        .budget-detail { color: var(--muted); font-size: 12px; }
-        .progress { height: 7px; margin-top: 8px; overflow: hidden; border-radius: 999px; background: #eaecf0; }
-        .progress span { display: block; height: 100%; background: var(--success); border-radius: inherit; }
-        .progress span.exceeded { background: var(--danger); }
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 760px; }
-        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); }
-        th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; background: #fcfcfd; }
-        tbody tr:hover { background: #fafbff; }
-        .amount { font-variant-numeric: tabular-nums; font-weight: 700; }
-        .actions { display: flex; gap: 6px; }
-        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; color: var(--muted); }
-        .form-panel { display: none; margin-bottom: 16px; }
-        .form-panel.open { display: block; }
-        .expense-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .expense-form .description { grid-column: span 2; }
-        .expense-form .form-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
-        .notice { display: none; margin-bottom: 14px; padding: 11px 14px; border-radius: 9px; }
-        .notice.show { display: block; }
-        .notice.success { color: #075c43; background: #dcfaed; }
-        .notice.error { color: #8f1d32; background: #ffe4e9; }
-        .empty { padding: 28px; text-align: center; color: var(--muted); }
-        @media (max-width: 900px) {
-            .summary-grid, .chart-grid, .two-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .two-column > :first-child { grid-column: 1 / -1; }
-            .expense-form { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 620px) {
-            .topbar-inner { padding: 14px 0; align-items: flex-start; }
-            .summary-grid, .chart-grid, .two-column { grid-template-columns: 1fr; }
-            .expense-form, .budget-form { grid-template-columns: 1fr; }
-            .expense-form .description, .budget-form .wide { grid-column: auto; }
-            .nav-actions .user-label { display: none; }
-        }
-    </style>
+    <title>轻账</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/webjars/chart.js/4.4.7/dist/chart.umd.js}"></script>
+    <script defer th:src="@{/js/common.js}"></script>
+    <script defer th:src="@{/js/dashboard.js}"></script>
 </head>
 <body>
 <header class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <h1>Expense Intelligence</h1>
-            <p>Budgets, trends, and transaction-level control</p>
+            <h1>轻账</h1>
+            <p>支出、预算和趋势，一页看清</p>
         </div>
         <div class="nav-actions">
-            <span class="user-label" sec:authentication="name">User</span>
-            <a sec:authorize="hasRole('ADMIN')" href="/admin" class="btn ghost">Admin</a>
-            <a href="/swagger-ui.html" class="btn ghost">API Docs</a>
-            <form method="post" action="/logout">
-                <input type="hidden" name="_csrf" th:value="${_csrf.token}">
-                <button type="submit" class="btn ghost">Log out</button>
+            <span class="user-label" sec:authentication="name">用户</span>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin}" class="btn ghost">管理</a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn ghost">退出</button>
             </form>
         </div>
     </div>
 </header>
 
-<main>
-    <div id="notice" class="notice"></div>
+<main class="page">
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
-    <section class="grid summary-grid" aria-label="Expense summary">
-        <article class="card metric"><div class="metric-label">Total spend</div><div id="total-spend" class="metric-value">$0.00</div></article>
-        <article class="card metric"><div class="metric-label">Average expense</div><div id="average-spend" class="metric-value">$0.00</div></article>
-        <article class="card metric"><div class="metric-label">Transactions</div><div id="transaction-count" class="metric-value">0</div></article>
-        <article class="card metric"><div class="metric-label">Top category</div><div id="top-category" class="metric-value">—</div></article>
+    <section class="grid summary-grid" aria-label="支出概览">
+        <article class="card metric"><div class="metric-label">总支出</div><div id="total-spend" class="metric-value">¥0.00</div></article>
+        <article class="card metric"><div class="metric-label">平均每笔</div><div id="average-spend" class="metric-value">¥0.00</div></article>
+        <article class="card metric"><div class="metric-label">记录数</div><div id="transaction-count" class="metric-value">0</div></article>
+        <article class="card metric"><div class="metric-label">最高分类</div><div id="top-category" class="metric-value">—</div></article>
     </section>
 
-    <div class="section-heading">
-        <div><h2>Analytics</h2><p>Aggregated on the server for the selected date range.</p></div>
-    </div>
+    <div class="section-heading"><div><h2>分析</h2><p>按条件查看支出变化</p></div></div>
     <section class="card panel">
         <div class="toolbar">
-            <div class="field"><label for="filter-from">From</label><input type="date" id="filter-from"></div>
-            <div class="field"><label for="filter-to">To</label><input type="date" id="filter-to"></div>
-            <div class="field"><label for="filter-category">Category</label><input type="text" id="filter-category" placeholder="All categories"></div>
-            <div class="field compact"><label for="filter-min">Min amount</label><input type="number" id="filter-min" min="0" step="0.01"></div>
-            <div class="field compact"><label for="filter-max">Max amount</label><input type="number" id="filter-max" min="0" step="0.01"></div>
-            <button class="btn" type="button" onclick="applyFilters()">Apply</button>
-            <button class="btn secondary" type="button" onclick="clearFilters()">Reset</button>
+            <div class="field"><label for="filter-from">开始日期</label><input type="date" id="filter-from"></div>
+            <div class="field"><label for="filter-to">结束日期</label><input type="date" id="filter-to"></div>
+            <div class="field"><label for="filter-category">分类</label><input type="text" id="filter-category" placeholder="全部分类"></div>
+            <div class="field compact"><label for="filter-min">最低金额</label><input type="number" id="filter-min" min="0" step="0.01"></div>
+            <div class="field compact"><label for="filter-max">最高金额</label><input type="number" id="filter-max" min="0" step="0.01"></div>
+            <button id="apply-filters" class="btn" type="button">查询</button>
+            <button id="clear-filters" class="btn secondary" type="button">清空</button>
         </div>
     </section>
 
-    <section class="grid two-column" style="margin-top: 16px;">
+    <section class="grid two-column">
         <div class="grid chart-grid">
-            <article class="card chart-box"><h3>Spend by category</h3><div class="chart-canvas"><canvas id="category-chart"></canvas></div></article>
-            <article class="card chart-box"><h3>Monthly trend</h3><div class="chart-canvas"><canvas id="monthly-chart"></canvas></div></article>
+            <article class="card chart-box"><h3>分类占比</h3><div class="chart-canvas"><canvas id="category-chart"></canvas></div></article>
+            <article class="card chart-box"><h3>月度趋势</h3><div class="chart-canvas"><canvas id="monthly-chart"></canvas></div></article>
         </div>
         <aside class="card panel">
-            <div class="section-heading" style="margin: 0 0 12px;">
-                <div><h2>Monthly budgets</h2><p id="budget-overview">No budget data</p></div>
-            </div>
+            <div class="section-heading compact"><div><h2>月度预算</h2><p id="budget-overview">暂无预算</p></div></div>
             <form id="budget-form" class="budget-form">
-                <div class="field"><label for="budget-month">Month</label><input type="month" id="budget-month" required></div>
-                <div class="field"><label for="budget-limit">Limit</label><input type="number" id="budget-limit" min="0.01" step="0.01" required></div>
-                <div class="field wide"><label for="budget-category">Category</label><input type="text" id="budget-category" maxlength="100" required></div>
-                <button class="btn wide" type="submit">Save category budget</button>
+                <div class="field"><label for="budget-month">月份</label><input type="month" id="budget-month" required></div>
+                <div class="field"><label for="budget-limit">额度</label><input type="number" id="budget-limit" min="0.01" step="0.01" required></div>
+                <div class="field wide"><label for="budget-category">分类</label><input type="text" id="budget-category" maxlength="100" required></div>
+                <button class="btn wide" type="submit">保存预算</button>
             </form>
             <div id="budget-list" class="budget-list"></div>
         </aside>
     </section>
 
     <div class="section-heading">
-        <div><h2>Transactions</h2><p>Filtered and paginated by the database.</p></div>
+        <div><h2>支出记录</h2><p>新增、修改或删除你的记录</p></div>
         <div class="nav-actions">
-            <a href="/api/expenses/report" class="btn secondary" download>Export CSV</a>
-            <button class="btn" type="button" onclick="openExpenseForm()">Add expense</button>
+            <a th:href="@{/api/expenses/report}" class="btn secondary" download>导出 CSV</a>
+            <button id="add-expense" class="btn" type="button">新增支出</button>
         </div>
     </div>
 
     <section id="expense-form-panel" class="card panel form-panel">
         <form id="expense-form" class="expense-form">
             <input type="hidden" id="expense-id">
-            <div class="field"><label for="amount">Amount</label><input type="number" id="amount" min="0.01" step="0.01" required></div>
-            <div class="field"><label for="category">Category</label><input type="text" id="category" maxlength="100" required></div>
-            <div class="field"><label for="expense-date">Date</label><input type="date" id="expense-date" required></div>
-            <div class="field description"><label for="description">Description</label><input type="text" id="description" maxlength="500"></div>
-            <div class="form-actions"><button class="btn" type="submit">Save expense</button><button class="btn secondary" type="button" onclick="closeExpenseForm()">Cancel</button></div>
+            <div class="field"><label for="amount">金额</label><input type="number" id="amount" min="0.01" step="0.01" required></div>
+            <div class="field"><label for="category">分类</label><input type="text" id="category" maxlength="100" required></div>
+            <div class="field"><label for="expense-date">日期</label><input type="date" id="expense-date" required></div>
+            <div class="field description"><label for="description">备注</label><input type="text" id="description" maxlength="500"></div>
+            <div class="form-actions"><button class="btn" type="submit">保存</button><button id="cancel-expense" class="btn secondary" type="button">取消</button></div>
         </form>
     </section>
 
     <section class="card">
         <div class="table-wrap">
             <table>
-                <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead>
-                <tbody id="expense-rows"></tbody>
+                <thead><tr><th>日期</th><th>分类</th><th>备注</th><th>金额</th><th>操作</th></tr></thead>
+                <tbody id="expense-rows"><tr><td colspan="5" class="empty">正在加载…</td></tr></tbody>
             </table>
         </div>
         <div class="pagination">
-            <span id="page-summary">0 transactions</span>
-            <div class="nav-actions"><button id="previous-page" class="btn secondary small" type="button">Previous</button><button id="next-page" class="btn secondary small" type="button">Next</button></div>
+            <span id="page-summary">0 条记录</span>
+            <div class="nav-actions"><button id="previous-page" class="btn secondary small" type="button">上一页</button><button id="next-page" class="btn secondary small" type="button">下一页</button></div>
         </div>
     </section>
 </main>
-
-<script>
-    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-    const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-    let currentPage = 0;
-    let totalPages = 0;
-    let currentExpenses = [];
-    let categoryChart;
-    let monthlyChart;
-
-    async function api(url, options = {}) {
-        const method = (options.method || 'GET').toUpperCase();
-        const headers = new Headers(options.headers || {});
-        if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) headers.set(csrfHeader, csrfToken);
-        const response = await fetch(url, { ...options, headers });
-        if (response.status === 401) {
-            window.location.href = '/login';
-            throw new Error('Authentication required');
-        }
-        if (!response.ok) {
-            let message = `Request failed (${response.status})`;
-            try {
-                const error = await response.json();
-                message = error.message || message;
-                if (error.fieldErrors && Object.keys(error.fieldErrors).length) {
-                    message += ': ' + Object.entries(error.fieldErrors).map(([field, value]) => `${field} ${value}`).join(', ');
-                }
-            } catch (_) { }
-            throw new Error(message);
-        }
-        if (response.status === 204) return null;
-        return response.json();
-    }
-
-    function filterParams(includePage = false) {
-        const params = new URLSearchParams();
-        const fields = {
-            from: document.getElementById('filter-from').value,
-            to: document.getElementById('filter-to').value,
-            category: document.getElementById('filter-category').value.trim(),
-            minAmount: document.getElementById('filter-min').value,
-            maxAmount: document.getElementById('filter-max').value
-        };
-        Object.entries(fields).forEach(([key, value]) => { if (value) params.set(key, value); });
-        if (includePage) {
-            params.set('page', currentPage);
-            params.set('size', '10');
-            params.set('sort', 'expenseDate,desc');
-            params.append('sort', 'id,desc');
-        }
-        return params;
-    }
-
-    async function refreshDashboard() {
-        try {
-            await Promise.all([loadExpenses(), loadAnalytics(), loadBudgets()]);
-        } catch (error) {
-            showNotice(error.message, 'error');
-        }
-    }
-
-    async function loadExpenses() {
-        const page = await api(`/api/expenses/search?${filterParams(true)}`);
-        currentExpenses = page.content;
-        totalPages = page.totalPages;
-        document.getElementById('page-summary').textContent = `${page.totalElements} transaction${page.totalElements === 1 ? '' : 's'} · page ${page.totalPages ? page.number + 1 : 0} of ${page.totalPages}`;
-        document.getElementById('previous-page').disabled = page.first;
-        document.getElementById('next-page').disabled = page.last || page.totalPages === 0;
-        const rows = document.getElementById('expense-rows');
-        if (!page.content.length) {
-            rows.innerHTML = '<tr><td colspan="5" class="empty">No transactions match these filters.</td></tr>';
-            return;
-        }
-        rows.innerHTML = page.content.map(expense => `
-            <tr>
-                <td>${escapeHtml(expense.expenseDate)}</td>
-                <td>${escapeHtml(expense.category)}</td>
-                <td>${escapeHtml(expense.description || '—')}</td>
-                <td class="amount">${currency.format(Number(expense.amount))}</td>
-                <td><div class="actions">
-                    <button class="btn secondary small" type="button" onclick="editExpense(${expense.id})">Edit</button>
-                    <button class="btn danger small" type="button" onclick="deleteExpense(${expense.id})">Delete</button>
-                </div></td>
-            </tr>`).join('');
-    }
-
-    async function loadAnalytics() {
-        const params = filterParams(false);
-        params.delete('category');
-        params.delete('minAmount');
-        params.delete('maxAmount');
-        const summary = await api(`/api/analytics/summary?${params}`);
-        document.getElementById('total-spend').textContent = currency.format(Number(summary.totalAmount));
-        document.getElementById('average-spend').textContent = currency.format(Number(summary.averageAmount));
-        document.getElementById('transaction-count').textContent = summary.transactionCount;
-        document.getElementById('top-category').textContent = summary.topCategory || '—';
-        renderCharts(summary);
-    }
-
-    function renderCharts(summary) {
-        categoryChart?.destroy();
-        monthlyChart?.destroy();
-        categoryChart = new Chart(document.getElementById('category-chart'), {
-            type: 'doughnut',
-            data: {
-                labels: summary.categoryBreakdown.map(item => item.category),
-                datasets: [{ data: summary.categoryBreakdown.map(item => Number(item.totalAmount)), backgroundColor: ['#4f46e5','#14b8a6','#f59e0b','#e11d48','#0ea5e9','#8b5cf6','#84cc16'] }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-        });
-        monthlyChart = new Chart(document.getElementById('monthly-chart'), {
-            type: 'bar',
-            data: {
-                labels: summary.monthlyTrend.map(item => item.month),
-                datasets: [{ label: 'Spend', data: summary.monthlyTrend.map(item => Number(item.totalAmount)), backgroundColor: '#4f46e5', borderRadius: 5 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: value => currency.format(value) } } }, plugins: { legend: { display: false } } }
-        });
-    }
-
-    async function loadBudgets() {
-        const month = document.getElementById('budget-month').value;
-        const overview = await api(`/api/budgets?month=${encodeURIComponent(month)}`);
-        document.getElementById('budget-overview').textContent = `${currency.format(Number(overview.totalSpent))} of ${currency.format(Number(overview.totalLimit))}`;
-        const list = document.getElementById('budget-list');
-        if (!overview.budgets.length) {
-            list.innerHTML = '<div class="empty">Add a category budget to track monthly limits.</div>';
-            return;
-        }
-        list.innerHTML = overview.budgets.map(budget => {
-            const width = Math.min(Number(budget.utilizationPercent), 100);
-            return `<div class="budget-item">
-                <div class="budget-row"><div><div class="budget-title">${escapeHtml(budget.category)}</div><div class="budget-detail">${currency.format(Number(budget.spentAmount))} / ${currency.format(Number(budget.limitAmount))}</div></div><button class="btn secondary small" type="button" onclick="deleteBudget(${budget.id})">Remove</button></div>
-                <div class="progress"><span class="${budget.exceeded ? 'exceeded' : ''}" style="width:${width}%"></span></div>
-            </div>`;
-        }).join('');
-    }
-
-    function openExpenseForm(expense = null) {
-        document.getElementById('expense-form-panel').classList.add('open');
-        document.getElementById('expense-id').value = expense?.id || '';
-        document.getElementById('amount').value = expense?.amount || '';
-        document.getElementById('category').value = expense?.category || '';
-        document.getElementById('expense-date').value = expense?.expenseDate || new Date().toISOString().slice(0, 10);
-        document.getElementById('description').value = expense?.description || '';
-    }
-
-    function closeExpenseForm() {
-        document.getElementById('expense-form-panel').classList.remove('open');
-        document.getElementById('expense-form').reset();
-    }
-
-    function editExpense(id) {
-        const expense = currentExpenses.find(item => item.id === id);
-        if (expense) openExpenseForm(expense);
-    }
-
-    async function deleteExpense(id) {
-        if (!confirm('Delete this expense?')) return;
-        try {
-            await api(`/api/expenses/${id}`, { method: 'DELETE' });
-            showNotice('Expense deleted.', 'success');
-            await refreshDashboard();
-        } catch (error) { showNotice(error.message, 'error'); }
-    }
-
-    async function deleteBudget(id) {
-        if (!confirm('Delete this budget?')) return;
-        try {
-            await api(`/api/budgets/${id}`, { method: 'DELETE' });
-            showNotice('Budget removed.', 'success');
-            await loadBudgets();
-        } catch (error) { showNotice(error.message, 'error'); }
-    }
-
-    document.getElementById('expense-form').addEventListener('submit', async event => {
-        event.preventDefault();
-        const id = document.getElementById('expense-id').value;
-        const payload = {
-            amount: Number(document.getElementById('amount').value),
-            category: document.getElementById('category').value.trim(),
-            expenseDate: document.getElementById('expense-date').value,
-            description: document.getElementById('description').value.trim() || null
-        };
-        try {
-            await api(id ? `/api/expenses/${id}` : '/api/expenses', {
-                method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-            });
-            closeExpenseForm();
-            showNotice(id ? 'Expense updated.' : 'Expense created.', 'success');
-            await refreshDashboard();
-        } catch (error) { showNotice(error.message, 'error'); }
-    });
-
-    document.getElementById('budget-form').addEventListener('submit', async event => {
-        event.preventDefault();
-        const payload = {
-            month: document.getElementById('budget-month').value,
-            category: document.getElementById('budget-category').value.trim(),
-            limitAmount: Number(document.getElementById('budget-limit').value)
-        };
-        try {
-            await api('/api/budgets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            event.target.reset();
-            setDefaultBudgetMonth();
-            showNotice('Budget saved.', 'success');
-            await loadBudgets();
-        } catch (error) { showNotice(error.message, 'error'); }
-    });
-
-    document.getElementById('budget-month').addEventListener('change', () => loadBudgets().catch(error => showNotice(error.message, 'error')));
-    document.getElementById('previous-page').addEventListener('click', () => { if (currentPage > 0) { currentPage--; loadExpenses(); } });
-    document.getElementById('next-page').addEventListener('click', () => { if (currentPage + 1 < totalPages) { currentPage++; loadExpenses(); } });
-
-    function applyFilters() { currentPage = 0; refreshDashboard(); }
-    function clearFilters() {
-        ['filter-from','filter-to','filter-category','filter-min','filter-max'].forEach(id => document.getElementById(id).value = '');
-        currentPage = 0;
-        refreshDashboard();
-    }
-    function setDefaultBudgetMonth() { document.getElementById('budget-month').value = new Date().toISOString().slice(0, 7); }
-    function showNotice(message, type) {
-        const notice = document.getElementById('notice');
-        notice.textContent = message;
-        notice.className = `notice show ${type}`;
-        setTimeout(() => notice.classList.remove('show'), 4500);
-    }
-    function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' })[character]);
-    }
-
-    setDefaultBudgetMonth();
-    refreshDashboard();
-</script>
 </body>
 </html>

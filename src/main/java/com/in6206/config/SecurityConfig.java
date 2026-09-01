@@ -1,8 +1,10 @@
 package com.in6206.config;
 
 import com.in6206.security.AuthTokenFilter;
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -47,7 +50,8 @@ public class SecurityConfig {
                         bearerTokenRequest
                 ))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/api/auth/signup", "/api/auth/signin", "/login",
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/", "/register", "/api/auth/signup", "/api/auth/signin", "/login",
                                 "/css/**", "/js/**", "/images/**", "/v3/api-docs/**",
                                 "/swagger-ui/**", "/swagger-ui.html", "/webjars/**").permitAll()
                         .requestMatchers("/api/expenses/**").authenticated()          // Ordinary user API
@@ -61,6 +65,17 @@ public class SecurityConfig {
                         .failureUrl("/login?error")
                         .permitAll()
                 )
+                .exceptionHandling(exceptions -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                new AntPathRequestMatcher("/api/**"))
+                        .accessDeniedHandler((request, response, exception) -> {
+                            if (request.getRequestURI().startsWith("/api/")) {
+                                response.sendError(HttpStatus.FORBIDDEN.value());
+                            } else {
+                                response.sendRedirect(request.getContextPath() + "/dashboard?forbidden");
+                            }
+                        }))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")

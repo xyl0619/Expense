@@ -21,7 +21,7 @@ public class JwtUtils {
     private String jwtSecret;
 
     @Value("${app.jwtExpirationMs}")
-    private int jwtExpirationMs;
+    private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
@@ -31,7 +31,6 @@ public class JwtUtils {
     public String generateJwtToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
-                //.claim("roles", roles) // 添加角色
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)

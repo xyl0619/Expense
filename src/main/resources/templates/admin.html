@@ -1,406 +1,55 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
-
-    <meta name="_csrf" th:content="${_csrf.token}" />
-    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-    <title>Admin Panel - Expense Tracker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        h1 {
-            color: #333;
-        }
-        .btn {
-            padding: 8px 16px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            cursor: pointer;
-            border: none;
-            font-size: 14px;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .actions button {
-            margin-right: 5px;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>管理 · 轻账</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/webjars/chart.js/4.4.7/dist/chart.umd.js}"></script>
+    <script defer th:src="@{/js/common.js}"></script>
+    <script defer th:src="@{/js/admin.js}"></script>
 </head>
 <body>
-<div class="container">
-    <!-- Only the administrator can view this page (controlled by the backend SecurityConfig). -->
-    <header>
-        <h1>Admin Dashboard</h1>
-        <div>
-            <button class="btn" onclick="loadUsers()">Refresh Users</button>
-            <button class="btn" onclick="downloadExpensesAsCSV()">Download Expenses Global Report (CSV)</button>
-            <form action="/logout" method="post" style="display:inline;">
-                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
-                <button class="btn">Logout</button>
-            </form>
-            <a href="/dashboard" class="btn">Back to Dashboard</a>
-        </div>
-    </header>
-
-    <h2>Users Management</h2>
-    <table id="users-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="users-list">
-        </tbody>
-    </table>
-
-    <h2>Global Expense Report</h2>
-    <table id="report-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-<!--            <th>User ID</th>-->
-            <th>Amount</th>
-            <th>Category</th>
-            <th>Date</th>
-            <th>Description</th>
-        </tr>
-        </thead>
-        <tbody id="report-list">
-        </tbody>
-    </table>
-
-    <!-- Visual chart area -->
-    <div style="margin-top: 30px;">
-        <h3>Expense Visualization</h3>
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 300px; height: 300px; position: relative;">
-                <canvas id="categoryChart" style="height: 100%; width: 100%;"></canvas>
-            </div>
-            <div style="flex: 1; min-width: 300px; height: 300px; position: relative;">
-                <canvas id="monthlyChart" style="height: 100%; width: 100%;"></canvas>
-            </div>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand"><h1>管理中心</h1><p>用户与全局支出概览</p></div>
+        <div class="nav-actions">
+            <a th:href="@{/dashboard}" class="btn ghost">返回首页</a>
+            <form th:action="@{/logout}" method="post"><button class="btn ghost" type="submit">退出</button></form>
         </div>
     </div>
-</div>
+</header>
 
-<script>
+<main class="page">
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    <div class="section-heading">
+        <div><h2>用户</h2><p>查看账户并删除不再需要的用户</p></div>
+        <button id="refresh-admin" class="btn" type="button">刷新</button>
+    </div>
+    <section class="card table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>身份</th><th>操作</th></tr></thead>
+            <tbody id="users-list"><tr><td colspan="5" class="empty">正在加载…</td></tr></tbody>
+        </table>
+    </section>
 
-    // The browser automatically sends the JSESSIONID cookie
-    function getCsrfToken() {
-        const tokenMeta = document.querySelector('meta[name="_csrf"]');
-        const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+    <div class="section-heading">
+        <div><h2>全部支出</h2><p>所有用户的汇总记录</p></div>
+        <button id="export-admin" class="btn secondary" type="button">导出 CSV</button>
+    </div>
+    <section class="card table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>用户</th><th>金额</th><th>分类</th><th>日期</th><th>备注</th></tr></thead>
+            <tbody id="report-list"><tr><td colspan="6" class="empty">正在加载…</td></tr></tbody>
+        </table>
+    </section>
 
-        if (!tokenMeta || !headerMeta) {
-            console.error("CSRF meta tags not found!");
-            return { token: null, headerName: null };
-        }
-
-        const token = tokenMeta.getAttribute('content');
-        const headerName = headerMeta.getAttribute('content');
-
-        return { token, headerName };
-    }
-    const { token, headerName } = getCsrfToken();
-
-    async function loadUsers() {
-        try {
-            const response = await fetch('/api/admin/users');
-
-            if (response.status === 403 || response.status === 401) {
-                alert('Access denied. Redirecting...');
-                window.location.href = '/dashboard';
-                return;
-            }
-
-            const users = await response.json();
-            const tbody = document.getElementById('users-list');
-            tbody.innerHTML = '';
-
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${escapeHtml(user.username)}</td>
-                    <td>${escapeHtml(user.email)}</td>
-                    <td class="actions">
-                        ${user.username !== 'admin' ? `<button class="btn btn-danger" onclick="deleteUser(${user.id})">Delete</button>` : '<span>Protected</span>'}
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        } catch (error) {
-            console.error('Error loading users:', error);
-            alert('Failed to load users.');
-        }
-    }
-
-    async function deleteUser(userId) {
-        if (!confirm('Are you sure you want to delete this user?')) return;
-
-        try {
-            const response = await fetch(`/api/admin/users/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    [headerName]: token
-                }
-            });
-
-            if (response.ok) {
-                loadUsers();
-            } else if (response.status === 403) {
-                alert('Access denied.');
-                window.location.href = '/dashboard';
-            } else {
-                alert('Failed to delete user.');
-            }
-        } catch (error) {
-            console.error('Delete error:', error);
-            alert('Network error.');
-        }
-    }
-    // New addition: The resolution date is "YYYY-MM"
-    function getYearMonth(dateStr) {
-        const d = new Date(dateStr);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    }
-
-    // New addition: Rendering charts
-    function renderCharts(expenses) {
-        console.log("Rendering charts with data:", expenses);
-        // 1. Summarize by category
-        const categoryMap = {};
-        expenses.forEach(e => {
-            const cat = e.category || 'Uncategorized';
-            categoryMap[cat] = (categoryMap[cat] || 0) + parseFloat(e.amount);
-        });
-
-        const categories = Object.keys(categoryMap);
-        const categoryAmounts = Object.values(categoryMap);
-
-        // Render pie chart
-        const ctx1 = document.getElementById('categoryChart').getContext('2d');
-        if (window.categoryChartInstance) window.categoryChartInstance.destroy();
-        window.categoryChartInstance = new Chart(ctx1, {
-            type: 'pie',
-            data: {
-                labels: categories,
-                datasets: [{
-                    data: categoryAmounts,
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: { display: true, text: 'Expenses by Category' }
-                }
-            }
-        });
-
-        // 2. BY MONTH
-        const monthlyMap = {};
-        expenses.forEach(e => {
-            const month = getYearMonth(e.expenseDate);
-            monthlyMap[month] = (monthlyMap[month] || 0) + parseFloat(e.amount);
-        });
-
-        const months = Object.keys(monthlyMap).sort();
-        const monthlyAmounts = months.map(m => monthlyMap[m]);
-
-        // Render the bar chart
-        const ctx2 = document.getElementById('monthlyChart').getContext('2d');
-        if (window.monthlyChartInstance) window.monthlyChartInstance.destroy();
-        window.monthlyChartInstance = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: months,
-                datasets: [{
-                    label: 'Total Expenses ($)',
-                    data: monthlyAmounts,
-                    backgroundColor: '#36A2EB'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: { display: true, text: 'Monthly Expense Trend' }
-                },
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
-
-
-    async function loadGlobalReport() {
-        try {
-            const response = await fetch('/api/admin/expenses/report',{headers: {
-                [headerName]: token
-            }});
-
-            if (response.status === 403) {
-                alert('Access denied.');
-                return;
-            }
-
-            const report = await response.json();
-            const tbody = document.getElementById('report-list');
-            tbody.innerHTML = '';
-
-            if (report.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No expenses found.</td></tr>';
-                return;
-            }
-
-            report.forEach(expense => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${expense.id}</td>
-                    <td>$${parseFloat(expense.amount).toFixed(2)}</td>
-                    <td>${escapeHtml(expense.category)}</td>
-                    <td>${expense.expenseDate}</td>
-                    <td>${expense.description ? escapeHtml(expense.description) : ''}</td>
-                `;
-                tbody.appendChild(row);
-
-                renderCharts(report);
-            });
-        } catch (error) {
-            console.error('Error loading report:', error);
-            alert('Failed to load global report.');
-        }
-
-    }
-
-    function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, m => map[m]);
-    }
-
-    // Data is directly loaded when the page is loaded (no need to check the token)
-    window.onload = function() {
-        loadUsers();
-        loadGlobalReport();
-    };
-
-    async function downloadExpensesAsCSV() {
-        try {
-            // Obtain the CSRF token (if required by the backend)
-            const { token, headerName } = getCsrfToken();
-
-            const response = await fetch('/api/admin/expenses/report', {
-                headers: {
-                    [headerName]: token
-                }
-            });
-
-            if (!response.ok) {
-                if (response.status === 403) {
-                    alert('Access denied.');
-                } else {
-                    alert('Failed to fetch expense data.');
-                }
-                return;
-            }
-
-            const expenses = await response.json();
-
-            if (expenses.length === 0) {
-                alert('No expense records found.');
-                return;
-            }
-
-            // Build CSV content
-            const headers = ['ID', 'Amount', 'Category', 'Date', 'Description'];
-            const rows = expenses.map(exp => [
-                exp.id,
-                parseFloat(exp.amount).toFixed(2),
-                `"${(exp.category || '').replace(/"/g, '""')}"`, // Escape double quotes
-                exp.expenseDate,
-                `"${(exp.description || '').replace(/"/g, '""')}"`
-            ]);
-
-            let csvContent = headers.join(',') + '\n';
-            csvContent += rows.map(row => row.join(',')).join('\n');
-
-            // Create a Blob and trigger a download
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'expenses_report.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-
-        } catch (error) {
-            console.error('Error downloading CSV:', error);
-            alert('Failed to download report. Please try again.');
-        }
-    }
-</script>
+    <section class="grid admin-grid admin-section">
+        <article class="card chart-box"><h3>分类占比</h3><div class="chart-canvas"><canvas id="admin-category-chart"></canvas></div></article>
+        <article class="card chart-box"><h3>月度趋势</h3><div class="chart-canvas"><canvas id="admin-monthly-chart"></canvas></div></article>
+    </section>
+</main>
 </body>
 </html>

@@ -1,9 +1,10 @@
 package com.in6206.controller;
 
 import com.in6206.payload.AdminUserDto;
-import com.in6206.payload.ExpenseDto;
+import com.in6206.payload.AdminExpenseDto;
 import com.in6206.repository.ExpenseRepository;
 import com.in6206.repository.UserRepository;
+import com.in6206.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,10 +21,14 @@ public class AdminController {
 
     private final UserRepository userRepository;
     private final ExpenseRepository expenseRepository;
+    private final UserService userService;
 
-    public AdminController(UserRepository userRepository, ExpenseRepository expenseRepository) {
+    public AdminController(UserRepository userRepository,
+                           ExpenseRepository expenseRepository,
+                           UserService userService) {
         this.userRepository = userRepository;
         this.expenseRepository = expenseRepository;
+        this.userService = userService;
     }
 
     @GetMapping("/users")
@@ -38,19 +43,14 @@ public class AdminController {
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        return userService.deleteNonAdminUser(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/expenses/report")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ExpenseDto>> getGlobalReport() {
-        List<ExpenseDto> dtos = expenseRepository.findAll().stream()
-                .map(ExpenseDto::from)
-                .toList();
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<List<AdminExpenseDto>> getGlobalReport() {
+        return ResponseEntity.ok(expenseRepository.findAllForAdminReport());
     }
 }

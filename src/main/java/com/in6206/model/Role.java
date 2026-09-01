@@ -14,4 +14,3 @@ public class Role {
     @Column(unique = true, nullable = false, length = 50)
     private String name;
 }
-// 1 USER  ; 2  ADMIN

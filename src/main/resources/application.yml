@@ -1,30 +1,31 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/expense_management?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:h2:file:./data/expense;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
 
   jpa:
+    open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: ${JPA_SHOW_SQL:false}
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
   flyway:
-    enabled: true
-    baseline-on-migrate: true
-    baseline-version: 1
+    enabled: false
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 app:
-  jwtSecret: ${JWT_SECRET}
+  jwtSecret: ${JWT_SECRET:ZXhwZW5zZS10cmFja2VyLWxvY2FsLWRldmVsb3BtZW50LWtleS1jaGFuZ2UtYmVmb3JlLXByb2R1Y3Rpb24tMg==}
   jwtExpirationMs: ${JWT_EXPIRATION_MS:86400000}
+  admin:
+    username: ${ADMIN_USERNAME:}
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
 
 springdoc:
   swagger-ui:
